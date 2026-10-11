@@ -1,16 +1,25 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { PhArrowRight } from '@phosphor-icons/vue'
+import { PhArrowRight, PhGear, PhStar } from '@phosphor-icons/vue'
 import { useI18n } from '../../i18n'
 import { navItems } from '../../nav'
+import { useRewards } from '../../composables/useRewards'
+import { useAuth } from '../../composables/useAuth'
 import Mascot from '../brand/Mascot.vue'
 import AppButton from '../ui/AppButton.vue'
 import LanguageToggle from '../ui/LanguageToggle.vue'
+import SettingsSheet from './SettingsSheet.vue'
 
 const { t } = useI18n()
 const route = useRoute()
+const { stars } = useRewards()
+const { user } = useAuth()
 const activeKey = computed(() => route.meta.nav as string | undefined)
+const brandTag = computed(() =>
+  user.value ? t('auth.greeting', { name: user.value.name }) : t('app.tagline'),
+)
+const settingsOpen = ref(false)
 </script>
 
 <template>
@@ -20,7 +29,7 @@ const activeKey = computed(() => route.meta.nav as string | undefined)
         <Mascot :size="40" decorative />
         <span class="brand__text">
           <span class="brand__name">{{ t('app.name') }}</span>
-          <span class="brand__tag">{{ t('app.tagline') }}</span>
+          <span class="brand__tag">{{ brandTag }}</span>
         </span>
       </RouterLink>
 
@@ -37,7 +46,20 @@ const activeKey = computed(() => route.meta.nav as string | undefined)
       </nav>
 
       <div class="topnav__actions">
+        <RouterLink to="/koleksi" class="stars" :aria-label="t('nav.collection')">
+          <PhStar :size="15" weight="fill" aria-hidden="true" />
+          <span>{{ stars }}</span>
+        </RouterLink>
         <LanguageToggle />
+        <button
+          type="button"
+          class="gear"
+          :aria-label="t('nav.settings')"
+          :aria-expanded="settingsOpen"
+          @click="settingsOpen = true"
+        >
+          <PhGear :size="20" weight="bold" aria-hidden="true" />
+        </button>
         <AppButton to="/belajar" variant="primary" size="sm" class="topnav__cta">
           {{ t('nav.cta') }}
           <template #icon-right>
@@ -46,6 +68,8 @@ const activeKey = computed(() => route.meta.nav as string | undefined)
         </AppButton>
       </div>
     </div>
+
+    <SettingsSheet :open="settingsOpen" @close="settingsOpen = false" />
   </header>
 </template>
 
@@ -127,6 +151,42 @@ const activeKey = computed(() => route.meta.nav as string | undefined)
   display: flex;
   align-items: center;
   gap: var(--s-2);
+}
+
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: 40px;
+  padding: 0 0.7rem;
+  border-radius: var(--r-pill);
+  background: var(--sunny-soft);
+  color: var(--sunny-strong);
+  font-weight: 800;
+  font-size: var(--fs-sm);
+  transition: transform 0.16s var(--ease-pop);
+}
+
+.stars:hover {
+  transform: translateY(-1px);
+}
+
+.gear {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  transition:
+    background-color 0.2s var(--ease-soft),
+    color 0.2s var(--ease-soft);
+}
+
+.gear:hover {
+  background: var(--primary-soft);
+  color: var(--primary-strong);
 }
 
 .topnav__cta {

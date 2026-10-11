@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-import { PhBookOpen, PhGameController, PhHouseSimple, PhUsers } from '@phosphor-icons/vue'
+import { PhBookOpen, PhGameController, PhHouseSimple, PhMedal, PhUsers } from '@phosphor-icons/vue'
 import type { MessageKey } from './i18n'
 
 export interface NavItem {
@@ -13,5 +13,6 @@ export const navItems: NavItem[] = [
   { key: 'home', to: '/', label: 'nav.home', icon: PhHouseSimple },
   { key: 'learn', to: '/belajar', label: 'nav.learn', icon: PhBookOpen },
   { key: 'play', to: '/latihan', label: 'nav.play', icon: PhGameController },
+  { key: 'collection', to: '/koleksi', label: 'nav.collection', icon: PhMedal },
   { key: 'about', to: '/tentang', label: 'nav.about', icon: PhUsers },
 ]

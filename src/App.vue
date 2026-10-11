@@ -1,21 +1,31 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import TopNav from './components/layout/TopNav.vue'
 import BottomNav from './components/layout/BottomNav.vue'
 import AppFooter from './components/layout/AppFooter.vue'
+import RouteProgress from './components/layout/RouteProgress.vue'
+import ErrorBoundary from './components/ui/ErrorBoundary.vue'
+
+const route = useRoute()
+const bare = computed(() => route.meta.bare === true)
 </script>
 
 <template>
   <a class="skip-link" href="#main">Lewati ke konten</a>
-  <TopNav />
-  <main id="main">
-    <RouterView v-slot="{ Component }">
-      <Transition name="page" mode="out-in">
-        <component :is="Component" />
-      </Transition>
-    </RouterView>
+  <RouteProgress />
+  <TopNav v-if="!bare" />
+  <main id="main" tabindex="-1" :class="{ 'main--bare': bare }">
+    <ErrorBoundary>
+      <RouterView v-slot="{ Component }">
+        <Transition name="page" mode="out-in">
+          <component :is="Component" />
+        </Transition>
+      </RouterView>
+    </ErrorBoundary>
   </main>
-  <AppFooter />
-  <BottomNav />
+  <AppFooter v-if="!bare" />
+  <BottomNav v-if="!bare" />
 </template>
 
 <style scoped>
@@ -33,6 +43,14 @@ import AppFooter from './components/layout/AppFooter.vue'
 
 .skip-link:focus {
   left: var(--s-4);
+}
+
+#main:focus {
+  outline: none;
+}
+
+#main.main--bare {
+  min-height: 100dvh;
 }
 
 .page-enter-active,

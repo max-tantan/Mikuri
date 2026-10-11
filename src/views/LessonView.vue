@@ -1,27 +1,43 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import {
   PhArrowLeft,
   PhArrowRight,
   PhCheck,
   PhCheckCircle,
   PhClock,
+  PhHandSwipeLeft,
   PhLightbulb,
   PhStar,
 } from '@phosphor-icons/vue'
 import AppButton from '../components/ui/AppButton.vue'
 import BlockSorter from '../components/lesson/BlockSorter.vue'
 import QuizCard from '../components/lesson/QuizCard.vue'
+import StepIndicator from '../components/lesson/StepIndicator.vue'
+import ReadAloudButton from '../components/ui/ReadAloudButton.vue'
+import SpeechBubble from '../components/brand/SpeechBubble.vue'
 import { findLesson } from '../data/tracks'
 import { trackIcons } from '../icons'
 import { trackVars } from '../trackTheme'
 import { useI18n } from '../i18n'
 import { useProgress } from '../composables/useProgress'
+import { useRewards } from '../composables/useRewards'
+import { useSound } from '../composables/useSound'
+import { useHaptics } from '../composables/useHaptics'
+import { useConfetti } from '../composables/useConfetti'
+import { useSettings } from '../composables/useSettings'
+import { useSwipe } from '../composables/useSwipe'
 
 const route = useRoute()
+const router = useRouter()
 const { t, pick } = useI18n()
 const { isDone, markDone, toggleDone } = useProgress()
+const { touchStreak } = useRewards()
+const { play } = useSound()
+const { buzz } = useHaptics()
+const { burst } = useConfetti()
+const { settings } = useSettings()
 
 const result = computed(() =>
   findLesson(route.params.track as string, route.params.lesson as string),
@@ -45,27 +61,104 @@ const next = computed(() =>
 
 const exerciseDone = ref(false)
 const quizDone = ref(false)
+const celebrated = ref(false)
+const activeStep = ref(0)
+const lessonEl = ref<HTMLElement | null>(null)
+
+const steps = computed(() => {
+  const list: { label: string; done: boolean; target: string }[] = [
+    { label: t('lesson.step.materi'), done: true, target: 'step-teach' },
+  ]
+  if (lesson.value?.code) list.push({ label: t('lesson.step.contoh'), done: true, target: 'step-code' })
+  if (lesson.value?.exercise) {
+    list.push({ label: t('lesson.step.latihan'), done: exerciseDone.value, target: 'step-ex' })
+  }
+  list.push({ label: t('lesson.step.kuis'), done: quizDone.value, target: 'step-quiz' })
+  return list
+})
 
 watch(
   () => route.fullPath,
   () => {
     exerciseDone.value = false
     quizDone.value = false
+    celebrated.value = false
+    activeStep.value = 0
   },
 )
 
+watch([exerciseDone, quizDone], () => {
+  if (!track.value || !lesson.value) return
+  const exOk = !lesson.value.exercise || exerciseDone.value
+  if (exOk && quizDone.value && !done.value) {
+    markDone(track.value.slug, lesson.value.slug)
+    touchStreak()
+    celebrate()
+  }
+})
+
+function celebrate() {
+  if (celebrated.value) return
+  celebrated.value = true
+  play('win')
+  buzz([15, 40, 15])
+  void burst({ kind: 'big', originY: 0.32 })
+}
+
 function finish() {
   if (!track.value || !lesson.value) return
+  const willBeDone = !done.value
   toggleDone(track.value.slug, lesson.value.slug)
+  if (willBeDone) {
+    touchStreak()
+    celebrate()
+  }
 }
 
 function markAndNext() {
-  if (track.value && lesson.value) markDone(track.value.slug, lesson.value.slug)
+  if (track.value && lesson.value) {
+    markDone(track.value.slug, lesson.value.slug)
+    touchStreak()
+    celebrate()
+  }
 }
+
+function goTo(slug: string) {
+  if (!track.value) return
+  router.push(`/belajar/${track.value.slug}/${slug}`)
+}
+
+function onScroll() {
+  let idx = 0
+  steps.value.forEach((step, i) => {
+    const el = document.getElementById(step.target)
+    if (el && el.getBoundingClientRect().top <= 150) idx = i
+  })
+  activeStep.value = idx
+}
+
+function scrollToStep(i: number) {
+  const el = document.getElementById(steps.value[i].target)
+  el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+useSwipe(lessonEl, {
+  onSwipeLeft: () => next.value && goTo(next.value.slug),
+  onSwipeRight: () => prev.value && goTo(prev.value.slug),
+})
+
+onMounted(() => {
+  window.addEventListener('scroll', onScroll, { passive: true })
+  onScroll()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onScroll)
+})
 </script>
 
 <template>
-  <div v-if="track && lesson" class="lesson shell section" :style="vars">
+  <div v-if="track && lesson" ref="lessonEl" class="lesson shell section" :style="vars">
     <RouterLink :to="`/belajar/${track.slug}`" class="crumb">
       <PhArrowLeft :size="16" weight="bold" aria-hidden="true" />
       {{ pick(track.title) }}
@@ -77,15 +170,20 @@ function markAndNext() {
         {{ pick(track.title) }}
       </span>
       <h1>{{ pick(lesson.title) }}</h1>
-      <p class="lead">{{ pick(lesson.summary) }}</p>
+      <div class="lesson__leadmin">
+        <p class="lead">{{ pick(lesson.summary) }}</p>
+        <ReadAloudButton v-if="settings.readAloud" :text="pick(lesson.summary)" />
+      </div>
       <p class="lesson__meta">
         <PhClock :size="15" weight="bold" aria-hidden="true" />
         {{ lesson.minutes }} {{ t('common.minutes') }}
       </p>
     </header>
 
+    <StepIndicator class="lesson__steps" :steps="steps" :active="activeStep" @select="scrollToStep" />
+
     <!-- TEACH -->
-    <section class="block" aria-labelledby="teach-title" v-reveal>
+    <section id="step-teach" class="block" aria-labelledby="teach-title" v-reveal>
       <h2 id="teach-title" class="block__title">
         <PhLightbulb :size="22" weight="fill" aria-hidden="true" />
         {{ t('lesson.teachTitle') }}
@@ -93,13 +191,14 @@ function markAndNext() {
       <ul class="teach">
         <li v-for="(point, i) in lesson.teach" :key="i" class="teach__item">
           <span class="teach__dot" aria-hidden="true"></span>
-          <span>{{ pick(point) }}</span>
+          <span class="teach__body">{{ pick(point) }}</span>
+          <ReadAloudButton v-if="settings.readAloud" :text="pick(point)" />
         </li>
       </ul>
     </section>
 
     <!-- CODE -->
-    <section v-if="lesson.code" class="block" aria-labelledby="code-title" v-reveal>
+    <section v-if="lesson.code" id="step-code" class="block" aria-labelledby="code-title" v-reveal>
       <h2 id="code-title" class="block__title">{{ t('lesson.codeTitle') }}</h2>
       <div class="code">
         <div class="code__bar">
@@ -111,20 +210,36 @@ function markAndNext() {
     </section>
 
     <!-- EXERCISE -->
-    <section v-if="lesson.exercise" class="block" aria-labelledby="ex-title" v-reveal>
+    <section v-if="lesson.exercise" id="step-ex" class="block" aria-labelledby="ex-title" v-reveal>
       <h2 id="ex-title" class="block__title">{{ t('lesson.exerciseTitle') }}</h2>
       <p class="block__hint">{{ pick(lesson.exercise.prompt) }}</p>
-      <BlockSorter :blocks="lesson.exercise.blocks" :solution="lesson.exercise.solution" @complete="exerciseDone = true" />
+      <BlockSorter
+        :blocks="lesson.exercise.blocks"
+        :solution="lesson.exercise.solution"
+        @complete="exerciseDone = true"
+      />
     </section>
 
     <!-- QUIZ -->
-    <section class="block" aria-labelledby="quiz-title" v-reveal>
+    <section id="step-quiz" class="block" aria-labelledby="quiz-title" v-reveal>
       <h2 id="quiz-title" class="block__title">
         <PhStar :size="22" weight="fill" aria-hidden="true" />
         {{ t('lesson.quizTitle') }}
       </h2>
       <QuizCard :quiz="lesson.quiz" @correct="quizDone = true" />
     </section>
+
+    <!-- CELEBRATION -->
+    <Transition name="pop">
+      <SpeechBubble
+        v-if="celebrated"
+        class="lesson__cheer"
+        :text="t('kuri.cheer')"
+        tone="praise"
+        expression="cheer"
+        :size="96"
+      />
+    </Transition>
 
     <!-- DONE -->
     <div class="lesson__done" :class="{ 'is-done': done }">
@@ -137,12 +252,13 @@ function markAndNext() {
     </div>
 
     <!-- NAV -->
+    <p class="lesson__swipe-hint">
+      <PhHandSwipeLeft :size="15" weight="bold" aria-hidden="true" />
+      {{ t('lesson.swipeHint') }}
+    </p>
+
     <nav class="lesson__nav" aria-label="navigation">
-      <RouterLink
-        v-if="prev"
-        :to="`/belajar/${track.slug}/${prev.slug}`"
-        class="lesson__nav-link"
-      >
+      <RouterLink v-if="prev" :to="`/belajar/${track.slug}/${prev.slug}`" class="lesson__nav-link">
         <PhArrowLeft :size="18" weight="bold" aria-hidden="true" />
         <span>
           <em>{{ t('common.prev') }}</em>
@@ -192,7 +308,7 @@ function markAndNext() {
   display: flex;
   flex-direction: column;
   gap: var(--s-3);
-  margin-bottom: var(--s-8);
+  margin-bottom: var(--s-5);
 }
 
 .lesson__badge {
@@ -206,6 +322,13 @@ function markAndNext() {
   font-size: var(--fs-xs);
 }
 
+.lesson__leadmin {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+
 .lesson__meta {
   display: inline-flex;
   align-items: center;
@@ -215,8 +338,18 @@ function markAndNext() {
   font-size: var(--fs-sm);
 }
 
+.lesson__steps {
+  position: sticky;
+  top: 68px;
+  z-index: 20;
+  margin-bottom: var(--s-6);
+  padding-inline: var(--s-1);
+  background: var(--cloud);
+}
+
 .block {
   margin-bottom: var(--s-8);
+  scroll-margin-top: 130px;
 }
 
 .block__title {
@@ -251,6 +384,11 @@ function markAndNext() {
   background: var(--surface);
   border: 1px solid var(--line);
   font-weight: 600;
+}
+
+.teach__body {
+  flex: 1;
+  min-width: 0;
 }
 
 .teach__dot {
@@ -324,6 +462,10 @@ function markAndNext() {
   white-space: pre;
 }
 
+.lesson__cheer {
+  margin-bottom: var(--s-6);
+}
+
 .lesson__done {
   display: flex;
   flex-wrap: wrap;
@@ -360,6 +502,17 @@ function markAndNext() {
 
 .lesson__done.is-done .lesson__done-btn {
   background: var(--mint-strong);
+}
+
+.lesson__swipe-hint {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  margin-top: var(--s-6);
+  color: var(--ink-faint);
+  font-size: var(--fs-xs);
+  font-weight: 700;
 }
 
 .lesson__nav {
@@ -417,5 +570,32 @@ function markAndNext() {
   background: var(--success-soft);
   color: var(--mint-strong);
   font-weight: 800;
+}
+
+.pop-enter-active {
+  animation: pop-in 0.4s var(--ease-pop);
+}
+.pop-leave-active {
+  transition: opacity 0.2s var(--ease-soft);
+}
+.pop-leave-to {
+  opacity: 0;
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .lesson__swipe-hint {
+    display: flex;
+  }
 }
 </style>

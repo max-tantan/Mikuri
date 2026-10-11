@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { PhArrowRight, PhBookOpenText, PhConfetti, PhCursorClick, PhShieldCheck, PhTranslate, PhTrophy } from '@phosphor-icons/vue'
+import { computed } from 'vue'
+import { PhArrowRight, PhBookOpenText, PhConfetti, PhCursorClick, PhPlayCircle, PhShieldCheck, PhTranslate, PhTrophy } from '@phosphor-icons/vue'
 import AppButton from '../components/ui/AppButton.vue'
 import Mascot from '../components/brand/Mascot.vue'
 import ProgressBar from '../components/ui/ProgressBar.vue'
@@ -10,7 +11,16 @@ import { useI18n } from '../i18n'
 import { useProgress } from '../composables/useProgress'
 
 const { t, pick } = useI18n()
-const { trackPercent } = useProgress()
+const { trackPercent, isDone, totalDone, allLessons } = useProgress()
+
+const nextLesson = computed(() => {
+  for (const track of tracks) {
+    for (const lesson of track.lessons) {
+      if (!isDone(track.slug, lesson.slug)) return { track, lesson }
+    }
+  }
+  return null
+})
 
 const steps = [
   { icon: PhBookOpenText, title: 'home.how.1.title', body: 'home.how.1.body' },
@@ -80,6 +90,54 @@ function avatar(seed: string) {
               {{ t('home.hero.secondary') }}
             </AppButton>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESUME -->
+    <section class="resume shell" aria-labelledby="resume-title">
+      <div class="resume__card" :class="{ 'is-done': !nextLesson }" v-reveal>
+        <div class="resume__art">
+          <Mascot :size="120" :expression="nextLesson ? 'happy' : 'cheer'" decorative />
+        </div>
+        <div class="resume__body">
+          <span class="eyebrow">{{ t('home.resume.eyebrow') }}</span>
+          <template v-if="nextLesson">
+            <h2 id="resume-title" class="resume__title">{{ t('home.resume.button') }}</h2>
+            <p class="resume__lead">
+              {{
+                totalDone > 0
+                  ? t('home.resume.progress', { done: totalDone, total: allLessons })
+                  : t('home.resume.start')
+              }}
+            </p>
+            <p class="resume__next">
+              <span class="resume__track" :style="trackVars(nextLesson.track.color)">
+                {{ pick(nextLesson.track.title) }}
+              </span>
+              {{ pick(nextLesson.lesson.title) }}
+            </p>
+            <AppButton
+              :to="`/belajar/${nextLesson.track.slug}/${nextLesson.lesson.slug}`"
+              variant="primary"
+              size="lg"
+            >
+              <template #icon-left>
+                <PhPlayCircle :size="20" weight="fill" aria-hidden="true" />
+              </template>
+              {{ t('home.resume.button') }}
+            </AppButton>
+          </template>
+          <template v-else>
+            <h2 id="resume-title" class="resume__title">{{ t('home.resume.done.title') }}</h2>
+            <p class="resume__lead">{{ t('home.resume.done.lead') }}</p>
+            <AppButton to="/koleksi" variant="primary" size="lg">
+              <template #icon-left>
+                <PhTrophy :size="20" weight="fill" aria-hidden="true" />
+              </template>
+              {{ t('home.resume.done.button') }}
+            </AppButton>
+          </template>
         </div>
       </div>
     </section>
@@ -621,6 +679,82 @@ function avatar(seed: string) {
     overflow: visible;
     margin-inline: 0;
     padding-inline: 0;
+  }
+}
+
+/* ---------------- RESUME ---------------- */
+.resume {
+  margin-top: calc(-1 * var(--s-6));
+  padding-bottom: var(--s-4);
+}
+
+.resume__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-4);
+  padding: var(--s-6);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  border: 2px solid var(--primary-soft);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.resume__card.is-done {
+  border-color: var(--success-soft);
+  background: linear-gradient(140deg, var(--success-soft), var(--surface));
+}
+
+.resume__art {
+  flex: none;
+}
+
+.resume__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--s-3);
+}
+
+.resume__title {
+  font-size: var(--fs-h3);
+}
+
+.resume__lead {
+  color: var(--ink-soft);
+  max-width: 46ch;
+}
+
+.resume__next {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.resume__track {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--r-pill);
+  background: var(--track-soft);
+  color: var(--track-strong);
+  font-size: var(--fs-xs);
+  font-weight: 800;
+}
+
+@media (min-width: 720px) {
+  .resume__card {
+    flex-direction: row;
+    text-align: left;
+    padding: var(--s-8);
+    gap: var(--s-8);
+  }
+
+  .resume__body {
+    align-items: flex-start;
   }
 }
 

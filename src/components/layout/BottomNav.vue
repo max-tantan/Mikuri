@@ -33,7 +33,7 @@ const activeKey = computed(() => route.meta.nav as string | undefined)
   bottom: 0;
   z-index: 40;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: var(--s-1);
   padding: var(--s-2) var(--s-3) calc(var(--s-2) + env(safe-area-inset-bottom, 0px));
   background: rgba(255, 255, 255, 0.94);

@@ -5,8 +5,14 @@ import BlockSorter from '../components/lesson/BlockSorter.vue'
 import { playExamples } from '../data/playground'
 import { trackVars } from '../trackTheme'
 import { useI18n } from '../i18n'
+import { useSound } from '../composables/useSound'
+import { useHaptics } from '../composables/useHaptics'
+import { useConfetti } from '../composables/useConfetti'
 
 const { t, pick } = useI18n()
+const { play } = useSound()
+const { buzz } = useHaptics()
+const { burst } = useConfetti()
 
 const selectedId = ref(playExamples[0].id)
 const example = computed(() => playExamples.find((e) => e.id === selectedId.value)!)
@@ -34,7 +40,14 @@ function run() {
   success.value =
     order.value.length === example.value.solution.length &&
     order.value.every((id, i) => id === example.value.solution[i])
-  if (success.value) output.value = lines
+  if (success.value) {
+    output.value = lines
+    play('correct')
+    buzz()
+    void burst({ kind: 'small', originY: 0.55 })
+  } else {
+    play('wrong')
+  }
 }
 
 const accentColor = computed(() => ['grape', 'sky', 'sunny'][playExamples.indexOf(example.value) % 3])

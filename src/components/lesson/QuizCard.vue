@@ -1,13 +1,19 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { PhCheckCircle, PhXCircle } from '@phosphor-icons/vue'
 import { useI18n } from '../../i18n'
+import Mascot from '../brand/Mascot.vue'
+import { useConfetti } from '../../composables/useConfetti'
+import { useHaptics } from '../../composables/useHaptics'
+import { useSound } from '../../composables/useSound'
 import type { Quiz } from '../../data/tracks'
 
 const props = defineProps<{ quiz: Quiz }>()
 const emit = defineEmits<{ correct: [] }>()
 
 const { t, pick } = useI18n()
+const { play } = useSound()
+const { buzz } = useHaptics()
+const { burst } = useConfetti()
 
 const selected = ref<string | null>(null)
 const checked = ref(false)
@@ -23,7 +29,15 @@ function choose(id: string) {
 function check() {
   if (!selected.value) return
   checked.value = true
-  if (selected.value === props.quiz.answer) emit('correct')
+  if (selected.value === props.quiz.answer) {
+    emit('correct')
+    play('correct')
+    buzz()
+    void burst({ kind: 'small' })
+  } else {
+    play('wrong')
+    buzz(30)
+  }
 }
 
 function retry() {
@@ -71,7 +85,7 @@ function retry() {
     </div>
 
     <p v-if="checked" class="quiz__feedback" :class="isCorrect ? 'is-ok' : 'is-no'" role="status">
-      <component :is="isCorrect ? PhCheckCircle : PhXCircle" :size="20" weight="fill" aria-hidden="true" />
+      <Mascot :size="36" decorative :expression="isCorrect ? 'cheer' : 'oops'" />
       <span>{{ isCorrect ? t('common.correct') : t('common.tryAgain') }} {{ pick(quiz.explain) }}</span>
     </p>
   </div>

@@ -44,6 +44,15 @@ export function useProgress() {
     persist()
   }
 
+  function clear() {
+    done.value = new Set()
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      /* ignore */
+    }
+  }
+
   function trackDoneCount(track: Track) {
     return track.lessons.filter((l) => done.value.has(lessonKey(track.slug, l.slug))).length
   }
@@ -63,6 +72,7 @@ export function useProgress() {
     isDone,
     markDone,
     toggleDone,
+    clear,
     trackDoneCount,
     trackPercent,
     totalDone,

@@ -282,6 +282,29 @@ code {
   }
 }
 
+/* Manual "reduce motion" preference from settings (overrides device) */
+html[data-motion='reduced'] {
+  scroll-behavior: auto;
+}
+
+html[data-motion='reduced'] *,
+html[data-motion='reduced'] *::before,
+html[data-motion='reduced'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+html[data-motion='reduced'] .reveal {
+  opacity: 1;
+  transform: none;
+}
+
+/* ------------------------------ Text size ------------------------------ */
+html[data-text-scale='large'] {
+  font-size: 18.5px;
+}
+
 /* ------------------------------ Shared primitives ------------------------------ */
 .tag {
   display: inline-flex;
