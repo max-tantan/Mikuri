@@ -113,25 +113,6 @@ function submit() {
       </header>
 
       <div class="auth__form-wrap">
-        <nav class="auth__tabs" :aria-label="t('auth.account')">
-          <RouterLink
-            to="/masuk"
-            class="auth__tab"
-            :class="{ 'is-active': !isRegister }"
-            :aria-current="!isRegister ? 'page' : undefined"
-          >
-            {{ t('auth.tab.login') }}
-          </RouterLink>
-          <RouterLink
-            to="/daftar"
-            class="auth__tab"
-            :class="{ 'is-active': isRegister }"
-            :aria-current="isRegister ? 'page' : undefined"
-          >
-            {{ t('auth.tab.register') }}
-          </RouterLink>
-        </nav>
-
         <span class="eyebrow">{{ eyebrow }}</span>
         <h1 class="auth__title">{{ title }}</h1>
         <p class="lead auth__lead">{{ lead }}</p>
@@ -206,6 +187,12 @@ function submit() {
             </span>
           </button>
         </form>
+
+        <p class="auth__switch">
+          <RouterLink :to="isRegister ? '/masuk' : '/daftar'">
+            {{ isRegister ? t('auth.toLogin') : t('auth.toRegister') }}
+          </RouterLink>
+        </p>
 
         <p class="auth__note">
           <PhLockSimple :size="15" weight="bold" aria-hidden="true" />
@@ -331,39 +318,6 @@ function submit() {
   display: flex;
   flex-direction: column;
   animation: rise 0.5s var(--ease-soft) both;
-}
-
-/* ------------------------------ Tabs ------------------------------ */
-.auth__tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--s-1);
-  padding: var(--s-1);
-  margin-bottom: var(--s-6);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-}
-
-.auth__tab {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  border-radius: var(--r-pill);
-  font-family: var(--font-display);
-  font-weight: 600;
-  color: var(--ink-soft);
-  transition:
-    background 0.22s var(--ease-soft),
-    color 0.22s var(--ease-soft),
-    box-shadow 0.22s var(--ease-soft);
-}
-
-.auth__tab.is-active {
-  background: var(--surface);
-  color: var(--primary-strong);
-  box-shadow: var(--shadow-sm);
 }
 
 .auth__title {
@@ -543,6 +497,20 @@ function submit() {
   border: 2.5px solid rgba(255, 255, 255, 0.45);
   border-top-color: #fff;
   animation: spin 0.7s linear infinite;
+}
+
+.auth__switch {
+  margin-top: var(--s-5);
+  text-align: center;
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+
+.auth__switch a {
+  color: var(--primary-strong);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .auth__note {

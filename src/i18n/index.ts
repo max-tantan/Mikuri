@@ -150,8 +150,6 @@ const messages = {
     'auth.needName': 'Tulis namamu dulu ya.',
     'auth.needPin': 'PIN harus 4 angka.',
     'auth.demoNote': 'Akun disimpan di perangkat ini saja. Tidak dikirim ke mana pun.',
-    'auth.tab.login': 'Masuk',
-    'auth.tab.register': 'Daftar',
     'auth.pin.show': 'Tampilkan PIN',
     'auth.pin.hide': 'Sembunyikan PIN',
     'auth.pin.count': '{n} dari 4 angka',
@@ -161,7 +159,6 @@ const messages = {
     'auth.benefit.3': 'Kumpulkan bintang dan lencana',
     'auth.greeting': 'Hai, {name}!',
     'auth.logout': 'Keluar',
-    'auth.account': 'Akun',
 
     'home.hero.eyebrow': 'Untuk usia 7-12 tahun',
     'home.hero.title': 'Belajar koding sambil bermain',
@@ -418,8 +415,6 @@ const messages = {
     'auth.needName': 'Please type your name first.',
     'auth.needPin': 'PIN must be 4 digits.',
     'auth.demoNote': 'Your account stays on this device only. It is never sent anywhere.',
-    'auth.tab.login': 'Sign in',
-    'auth.tab.register': 'Register',
     'auth.pin.show': 'Show PIN',
     'auth.pin.hide': 'Hide PIN',
     'auth.pin.count': '{n} of 4 digits',
@@ -429,7 +424,6 @@ const messages = {
     'auth.benefit.3': 'Collect stars and badges',
     'auth.greeting': 'Hi, {name}!',
     'auth.logout': 'Sign out',
-    'auth.account': 'Account',
 
     'home.hero.eyebrow': 'For ages 7-12',
     'home.hero.title': 'Learn to code through play',
