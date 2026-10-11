@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { PhArrowCounterClockwise, PhPlay, PhSparkle } from '@phosphor-icons/vue'
+import { PhArrowCounterClockwise, PhGameController, PhPlay, PhSparkle } from '@phosphor-icons/vue'
 import BlockSorter from '../components/lesson/BlockSorter.vue'
+import PageHeader from '../components/layout/PageHeader.vue'
 import { playExamples } from '../data/playground'
 import { trackVars } from '../trackTheme'
 import { useI18n } from '../i18n'
@@ -62,11 +63,14 @@ const accent = computed(() =>
 
 <template>
   <div class="play shell section" :style="accent">
-    <header class="play__head" v-reveal>
-      <span class="eyebrow">{{ t('play.eyebrow') }}</span>
-      <h1>{{ t('play.title') }}</h1>
-      <p class="lead">{{ t('play.lead') }}</p>
-    </header>
+    <PageHeader
+      v-reveal
+      :eyebrow="t('play.eyebrow')"
+      :title="t('play.title')"
+      :lead="t('play.lead')"
+      :icon="PhGameController"
+      tone="grape"
+    />
 
     <section class="play__panel" v-reveal>
       <p class="play__label">{{ t('play.chooseExample') }}</p>
@@ -123,13 +127,6 @@ const accent = computed(() =>
 </template>
 
 <style scoped>
-.play__head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-  margin-bottom: var(--s-8);
-}
-
 .play__panel {
   display: grid;
   gap: var(--s-5);

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { PhFire, PhLockSimple, PhMedal, PhStar, PhTrophy } from '@phosphor-icons/vue'
 import AppButton from '../components/ui/AppButton.vue'
+import PageHeader from '../components/layout/PageHeader.vue'
 import SpeechBubble from '../components/brand/SpeechBubble.vue'
 import ProgressBar from '../components/ui/ProgressBar.vue'
 import { useI18n } from '../i18n'
@@ -13,11 +14,14 @@ const { badges, unlockedBadges, stars, streak } = useRewards()
 
 <template>
   <div class="collection shell section">
-    <header class="collection__head" v-reveal>
-      <span class="eyebrow">{{ t('collection.eyebrow') }}</span>
-      <h1>{{ t('collection.title') }}</h1>
-      <p class="lead">{{ t('collection.lead') }}</p>
-    </header>
+    <PageHeader
+      v-reveal
+      :eyebrow="t('collection.eyebrow')"
+      :title="t('collection.title')"
+      :lead="t('collection.lead')"
+      :icon="PhMedal"
+      tone="sunny"
+    />
 
     <div class="stats" v-reveal>
       <div class="stat stat--star">
@@ -80,13 +84,6 @@ const { badges, unlockedBadges, stars, streak } = useRewards()
 </template>
 
 <style scoped>
-.collection__head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
-  margin-bottom: var(--s-6);
-}
-
 .stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

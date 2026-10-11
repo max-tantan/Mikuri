@@ -12,6 +12,7 @@ import {
   PhStar,
 } from '@phosphor-icons/vue'
 import AppButton from '../components/ui/AppButton.vue'
+import PageHeader from '../components/layout/PageHeader.vue'
 import BlockSorter from '../components/lesson/BlockSorter.vue'
 import QuizCard from '../components/lesson/QuizCard.vue'
 import StepIndicator from '../components/lesson/StepIndicator.vue'
@@ -159,26 +160,20 @@ onBeforeUnmount(() => {
 
 <template>
   <div v-if="track && lesson" ref="lessonEl" class="lesson shell section" :style="vars">
-    <RouterLink :to="`/belajar/${track.slug}`" class="crumb">
-      <PhArrowLeft :size="16" weight="bold" aria-hidden="true" />
-      {{ pick(track.title) }}
-    </RouterLink>
-
-    <header class="lesson__head" v-reveal>
-      <span class="lesson__badge" :style="{ background: 'var(--track-soft)', color: 'var(--track-strong)' }">
-        <component :is="trackIcons[track.icon]" :size="15" weight="fill" aria-hidden="true" />
-        {{ pick(track.title) }}
-      </span>
-      <h1>{{ pick(lesson.title) }}</h1>
-      <div class="lesson__leadmin">
-        <p class="lead">{{ pick(lesson.summary) }}</p>
-        <ReadAloudButton v-if="settings.readAloud" :text="pick(lesson.summary)" />
-      </div>
-      <p class="lesson__meta">
+    <PageHeader
+      v-reveal
+      :title="pick(lesson.title)"
+      :lead="pick(lesson.summary)"
+      :icon="trackIcons[track.icon]"
+      :tone="track.color"
+      :crumbs="[{ label: pick(track.title), to: `/belajar/${track.slug}` }]"
+    >
+      <ReadAloudButton v-if="settings.readAloud" :text="pick(lesson.summary)" />
+      <span class="lesson__meta">
         <PhClock :size="15" weight="bold" aria-hidden="true" />
         {{ lesson.minutes }} {{ t('common.minutes') }}
-      </p>
-    </header>
+      </span>
+    </PageHeader>
 
     <StepIndicator class="lesson__steps" :steps="steps" :active="activeStep" @select="scrollToStep" />
 
@@ -290,45 +285,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.crumb {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-1);
-  font-weight: 800;
-  font-size: var(--fs-sm);
-  color: var(--ink-soft);
-  margin-bottom: var(--s-5);
-}
-
-.crumb:hover {
-  color: var(--track-strong);
-}
-
-.lesson__head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-  margin-bottom: var(--s-5);
-}
-
-.lesson__badge {
-  display: inline-flex;
-  align-self: flex-start;
-  align-items: center;
-  gap: var(--s-1);
-  padding: 0.3rem 0.7rem;
-  border-radius: var(--r-pill);
-  font-weight: 800;
-  font-size: var(--fs-xs);
-}
-
-.lesson__leadmin {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--s-3);
-}
-
 .lesson__meta {
   display: inline-flex;
   align-items: center;

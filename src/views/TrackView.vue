@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import { PhArrowLeft, PhArrowRight, PhCheckCircle, PhClock, PhBookOpen } from '@phosphor-icons/vue'
+import { PhArrowRight, PhCheckCircle, PhClock, PhBookOpen } from '@phosphor-icons/vue'
 import AppButton from '../components/ui/AppButton.vue'
+import PageHeader from '../components/layout/PageHeader.vue'
 import ProgressBar from '../components/ui/ProgressBar.vue'
 import { findTrack } from '../data/tracks'
 import { trackIcons } from '../icons'
@@ -19,37 +20,39 @@ const totalMinutes = computed(() =>
   track.value ? track.value.lessons.reduce((sum, l) => sum + l.minutes, 0) : 0,
 )
 const vars = computed(() => (track.value ? trackVars(track.value.color) : {}))
+const statStyle = {
+  background: 'var(--track-soft)',
+  color: 'var(--track-strong)',
+  borderColor: 'transparent',
+}
 </script>
 
 <template>
   <div v-if="track" class="track shell section" :style="vars">
-    <RouterLink to="/belajar" class="crumb">
-      <PhArrowLeft :size="16" weight="bold" aria-hidden="true" />
-      {{ t('lesson.breadcrumb') }}
-    </RouterLink>
-
-    <header class="track__hero" v-reveal>
-      <span class="track__icon">
-        <component :is="trackIcons[track.icon]" :size="34" weight="fill" aria-hidden="true" />
+    <PageHeader
+      v-reveal
+      :title="pick(track.title)"
+      :lead="pick(track.about)"
+      :icon="trackIcons[track.icon]"
+      :tone="track.color"
+      :crumbs="[{ label: t('lesson.breadcrumb'), to: '/belajar' }]"
+    >
+      <span class="tag" :style="statStyle">
+        <PhBookOpen :size="15" weight="fill" aria-hidden="true" />
+        {{ track.lessons.length }} {{ t('common.lessons') }}
       </span>
-      <div class="track__copy">
-        <h1>{{ pick(track.title) }}</h1>
-        <p class="lead">{{ pick(track.about) }}</p>
-        <div class="track__stats">
-          <span class="tag" :style="{ background: 'var(--track-soft)', color: 'var(--track-strong)', borderColor: 'transparent' }">
-            <PhBookOpen :size="15" weight="fill" aria-hidden="true" />
-            {{ track.lessons.length }} {{ t('common.lessons') }}
-          </span>
-          <span class="tag" :style="{ background: 'var(--track-soft)', color: 'var(--track-strong)', borderColor: 'transparent' }">
-            <PhClock :size="15" weight="fill" aria-hidden="true" />
-            {{ totalMinutes }} {{ t('common.minutes') }}
-          </span>
-        </div>
-      </div>
-      <div class="track__progress">
-        <ProgressBar :value="trackPercent(track)" :color="track.color" :label="`${trackPercent(track)}%`" />
-      </div>
-    </header>
+      <span class="tag" :style="statStyle">
+        <PhClock :size="15" weight="fill" aria-hidden="true" />
+        {{ totalMinutes }} {{ t('common.minutes') }}
+      </span>
+      <template #aside>
+        <ProgressBar
+          :value="trackPercent(track)"
+          :color="track.color"
+          :label="`${trackPercent(track)}%`"
+        />
+      </template>
+    </PageHeader>
 
     <h2 class="track__subtitle">{{ t('track.lessonsTitle') }}</h2>
 
@@ -96,53 +99,6 @@ const vars = computed(() => (track.value ? trackVars(track.value.color) : {}))
 </template>
 
 <style scoped>
-.crumb {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-1);
-  font-weight: 800;
-  font-size: var(--fs-sm);
-  color: var(--ink-soft);
-  margin-bottom: var(--s-5);
-}
-
-.crumb:hover {
-  color: var(--track-strong);
-}
-
-.track__hero {
-  display: grid;
-  gap: var(--s-4);
-  padding: var(--s-6);
-  border-radius: var(--r-lg);
-  background: linear-gradient(140deg, var(--track-soft), var(--surface));
-  border: 1px solid var(--line);
-  margin-bottom: var(--s-8);
-}
-
-.track__icon {
-  display: grid;
-  place-items: center;
-  width: 62px;
-  height: 62px;
-  border-radius: var(--r-md);
-  background: var(--track);
-  color: #fff;
-  box-shadow: 0 10px 22px -10px var(--track);
-}
-
-.track__copy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-}
-
-.track__stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--s-2);
-}
-
 .track__subtitle {
   font-size: var(--fs-h3);
   margin-bottom: var(--s-4);
@@ -235,17 +191,5 @@ const vars = computed(() => (track.value ? trackVars(track.value.color) : {}))
 
 .track__cta {
   margin-top: var(--s-8);
-}
-
-@media (min-width: 760px) {
-  .track__hero {
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    padding: var(--s-8);
-  }
-
-  .track__progress {
-    min-width: 220px;
-  }
 }
 </style>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { PhChalkboard, PhCaretDown, PhLockSimple, PhShieldCheck, PhUsers, PhGraduationCap } from '@phosphor-icons/vue'
 import Mascot from '../components/brand/Mascot.vue'
+import PageHeader from '../components/layout/PageHeader.vue'
 import { useI18n } from '../i18n'
 
 const { t } = useI18n()
@@ -15,11 +16,14 @@ const faqs = [
 
 <template>
   <div class="about shell section">
-    <header class="about__head" v-reveal>
-      <span class="eyebrow">{{ t('about.eyebrow') }}</span>
-      <h1>{{ t('about.title') }}</h1>
-      <p class="lead">{{ t('about.lead') }}</p>
-    </header>
+    <PageHeader
+      v-reveal
+      :eyebrow="t('about.eyebrow')"
+      :title="t('about.title')"
+      :lead="t('about.lead')"
+      :icon="PhUsers"
+      tone="mint"
+    />
 
     <div class="panel panel--method" v-reveal>
       <span class="panel__icon panel__icon--grape">
@@ -77,13 +81,6 @@ const faqs = [
 </template>
 
 <style scoped>
-.about__head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-  margin-bottom: var(--s-8);
-}
-
 .panel {
   position: relative;
   display: flex;

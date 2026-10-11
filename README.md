@@ -34,7 +34,8 @@ src/
   components/brand/      # Mascot "Kuri" (berekspresi), SpeechBubble
   components/ui/         # AppButton, AppCard, ProgressBar, LanguageToggle,
                          # ReadAloudButton, SkeletonBlock, ErrorBoundary
-  components/layout/     # TopNav, BottomNav, AppFooter, SettingsSheet, RouteProgress
+  components/layout/     # TopNav, BottomNav, AppFooter, SettingsSheet, RouteProgress,
+                         # PageHeader (header konten per-halaman)
   components/lesson/     # BlockSorter (urutkan ulang), QuizCard, StepIndicator
   views/                 # Home, Learn, Track, Lesson, Playground, Collection,
                          # About, NotFound
@@ -57,6 +58,7 @@ src/
 
 - **Gerbang masuk**: halaman `/masuk` & `/daftar` (nama + PIN 4 angka) tampil sebelum halaman utama. Semua route lain dijaga; belum masuk akan diarahkan ke `/masuk`. Ini **sesi lokal demo**: tidak ada server, akun hanya tersimpan di perangkat. Keluar lewat panel Pengaturan.
 - **Kuri berekspresi** (`idle/happy/cheer/think/oops`) dengan balon ucapan untuk petunjuk dan pujian.
+- **Header konten** seragam di semua halaman (kecuali Beranda) via `PageHeader`: pita gradien lembut beraksen warna, chip ikon, eyebrow pill, dan breadcrumb opsional.
 - **Reward**: bintang per pelajaran, streak harian, lencana jalur. Perayaan confetti saat berhasil.
 - **Latihan**: blok bisa diurutkan ulang (drag di desktop, tombol naik/turun untuk aksesibilitas).
 - **Pengaturan** (ikon roda gigi di header): bahasa, suara, getaran, baca nyaring, ukuran teks, kurangi gerak, reset progres. Suara & getaran **default mati**.

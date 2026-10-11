@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { PhArrowRight, PhStar } from '@phosphor-icons/vue'
+import { PhArrowRight, PhBookOpen, PhStar } from '@phosphor-icons/vue'
 import AppButton from '../components/ui/AppButton.vue'
+import PageHeader from '../components/layout/PageHeader.vue'
 import ProgressBar from '../components/ui/ProgressBar.vue'
 import { tracks } from '../data/tracks'
 import { trackIcons } from '../icons'
@@ -14,11 +15,14 @@ const { trackDoneCount, trackPercent, totalDone, overallPercent, allLessons } = 
 
 <template>
   <div class="learn shell section">
-    <header class="learn__head" v-reveal>
-      <span class="eyebrow">{{ t('learn.eyebrow') }}</span>
-      <h1>{{ t('learn.title') }}</h1>
-      <p class="lead">{{ t('learn.lead') }}</p>
-    </header>
+    <PageHeader
+      v-reveal
+      :eyebrow="t('learn.eyebrow')"
+      :title="t('learn.title')"
+      :lead="t('learn.lead')"
+      :icon="PhBookOpen"
+      tone="coral"
+    />
 
     <div class="overview" v-reveal>
       <div class="overview__stat">
@@ -67,13 +71,6 @@ const { trackDoneCount, trackPercent, totalDone, overallPercent, allLessons } = 
 </template>
 
 <style scoped>
-.learn__head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-  margin-bottom: var(--s-8);
-}
-
 .overview {
   display: grid;
   gap: var(--s-4);

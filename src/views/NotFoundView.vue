@@ -8,26 +8,57 @@ const { t } = useI18n()
 
 <template>
   <section class="missing shell">
-    <Mascot :size="180" float :alt="t('home.hero.mascotAlt')" />
+    <div class="missing__art">
+      <div class="missing__blob">
+        <Mascot :size="160" expression="oops" float :alt="t('home.hero.mascotAlt')" />
+      </div>
+    </div>
+    <span class="eyebrow">404</span>
     <h1>{{ t('common.notFound') }}</h1>
-    <p class="lead">{{ t('about.lead') }}</p>
+    <p class="lead">Waduh, halaman yang kamu cari nggak ada. Yuk balik ke beranda bareng Kuri!</p>
     <AppButton to="/" variant="primary" size="lg">{{ t('common.backHome') }}</AppButton>
   </section>
 </template>
 
 <style scoped>
 .missing {
-  min-height: 60dvh;
+  min-height: 70dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  gap: var(--s-5);
-  padding-block: var(--s-16);
+  gap: var(--s-4);
+  padding-block: var(--s-14);
+}
+
+.missing__art {
+  margin-bottom: var(--s-2);
+}
+
+.missing__blob {
+  display: grid;
+  place-items: center;
+  width: 188px;
+  height: 188px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 40%, #fff, var(--surface-2));
+  box-shadow: var(--shadow-lg), inset 0 0 0 8px rgba(255, 255, 255, 0.6);
+  animation: float 4s ease-in-out infinite;
 }
 
 .missing .lead {
-  max-width: 40ch;
+  max-width: 38ch;
+  color: var(--ink-soft);
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 </style>

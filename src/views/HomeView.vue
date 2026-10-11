@@ -1,17 +1,26 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { PhArrowRight, PhBookOpenText, PhConfetti, PhCursorClick, PhPlayCircle, PhShieldCheck, PhTranslate, PhTrophy } from '@phosphor-icons/vue'
 import AppButton from '../components/ui/AppButton.vue'
 import Mascot from '../components/brand/Mascot.vue'
 import ProgressBar from '../components/ui/ProgressBar.vue'
+import OnboardingModal from '../components/onboarding/OnboardingModal.vue'
 import { tracks } from '../data/tracks'
 import { trackIcons } from '../icons'
 import { trackVars } from '../trackTheme'
 import { useI18n } from '../i18n'
 import { useProgress } from '../composables/useProgress'
+import { useOnboarding } from '../composables/useOnboarding'
 
 const { t, pick } = useI18n()
 const { trackPercent, isDone, totalDone, allLessons } = useProgress()
+const { isOpen, markSeen } = useOnboarding()
+
+onMounted(() => {
+  if (!isOpen.value) {
+    isOpen.value = false
+  }
+})
 
 const nextLesson = computed(() => {
   for (const track of tracks) {
@@ -256,6 +265,7 @@ function avatar(seed: string) {
         <Mascot :size="180" float class="cta__mascot" :alt="t('home.hero.mascotAlt')" />
       </div>
     </section>
+    <OnboardingModal :open="isOpen" @close="markSeen" />
   </div>
 </template>
 
